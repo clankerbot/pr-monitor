@@ -1,6 +1,6 @@
 name: 'PR Monitor'
 description: 'Waits for all other workflow checks to complete and reports aggregate status'
-author: 'clankerbot'
+author: 'thekevinscott'
 
 inputs:
   excluded-jobs:

@@ -29,7 +29,7 @@ jobs:
     name: 'Check All Workflows'
     runs-on: ubuntu-latest
     steps:
-      - uses: clankerbot/pr-monitor@v1
+      - uses: thekevinscott/pr-monitor@v1
 ```
 
 Then set "Check All Workflows" as your only required check in branch protection.
@@ -47,7 +47,7 @@ Then set "Check All Workflows" as your only required check in branch protection.
 ## Example with exclusions
 
 ```yaml
-- uses: clankerbot/pr-monitor@v1
+- uses: thekevinscott/pr-monitor@v1
   with:
     excluded-jobs: 'deploy-preview,notify-slack'
     timeout: '15'
