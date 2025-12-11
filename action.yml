@@ -3,8 +3,11 @@ description: 'Waits for all other workflow checks to complete and reports aggreg
 author: 'thekevinscott'
 
 inputs:
+  job-name:
+    description: 'Name of the job running this action (required to exclude itself)'
+    required: true
   excluded-jobs:
-    description: 'Comma-separated list of job names to exclude from monitoring (this action is always excluded)'
+    description: 'Comma-separated list of additional job names to exclude from monitoring'
     required: false
     default: ''
   pre-sleep:
@@ -30,6 +33,7 @@ runs:
     - name: Wait for all checks
       uses: actions/github-script@v7
       env:
+        JOB_NAME: ${{ inputs.job-name }}
         EXCLUDED_JOBS: ${{ inputs.excluded-jobs }}
         PRE_SLEEP: ${{ inputs.pre-sleep }}
         CHECK_INTERVAL: ${{ inputs.check-interval }}
@@ -41,11 +45,12 @@ runs:
           const CHECK_INTERVAL = parseInt(process.env.CHECK_INTERVAL) * 1000;
           const MAX_DURATION = parseInt(process.env.TIMEOUT) * 60 * 1000;
 
-          // Always exclude the job running this action
+          // Build exclusion list from job name and any additional excluded jobs
+          const jobName = process.env.JOB_NAME;
           const userExcluded = process.env.EXCLUDED_JOBS
-            ? process.env.EXCLUDED_JOBS.split(',').map(s => s.trim())
+            ? process.env.EXCLUDED_JOBS.split(',').map(s => s.trim()).filter(Boolean)
             : [];
-          const EXCLUDED_JOBS = [...userExcluded, context.job];
+          const EXCLUDED_JOBS = [jobName, ...userExcluded];
 
           const { owner, repo } = context.repo;
 

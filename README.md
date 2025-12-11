@@ -29,38 +29,51 @@ jobs:
     name: 'Check All Workflows'
     runs-on: ubuntu-latest
     steps:
-      - uses: thekevinscott/pr-monitor@v1
+      - uses: clankerbot/pr-monitor@v1
+        with:
+          job-name: 'Check All Workflows'
 ```
 
 Then set "Check All Workflows" as your only required check in branch protection.
 
 ## Inputs
 
-| Input | Description | Default |
-|-------|-------------|---------|
-| `excluded-jobs` | Comma-separated job names to exclude | `''` |
-| `pre-sleep` | Seconds to wait before checking | `10` |
-| `check-interval` | Seconds between status checks | `5` |
-| `timeout` | Maximum minutes to wait | `10` |
-| `github-token` | GitHub token for API access | `${{ github.token }}` |
+| Input | Description | Required | Default |
+|-------|-------------|----------|---------|
+| `job-name` | Name of the job running this action (must match exactly) | **Yes** | - |
+| `excluded-jobs` | Comma-separated additional job names to exclude | No | `''` |
+| `pre-sleep` | Seconds to wait before checking | No | `10` |
+| `check-interval` | Seconds between status checks | No | `5` |
+| `timeout` | Maximum minutes to wait | No | `10` |
+| `github-token` | GitHub token for API access | No | `${{ github.token }}` |
 
 ## Example with exclusions
 
 ```yaml
-- uses: thekevinscott/pr-monitor@v1
-  with:
-    excluded-jobs: 'deploy-preview,notify-slack'
-    timeout: '15'
+jobs:
+  monitor:
+    name: 'PR Status'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: clankerbot/pr-monitor@v1
+        with:
+          job-name: 'PR Status'
+          excluded-jobs: 'deploy-preview,notify-slack'
+          timeout: '15'
 ```
 
 ## How it works
 
 1. Waits `pre-sleep` seconds for other workflows to start
 2. Polls the GitHub Checks API every `check-interval` seconds
-3. Excludes itself and any jobs in `excluded-jobs`
+3. Excludes itself (via `job-name`) and any jobs in `excluded-jobs`
 4. Fails immediately if any check fails
 5. Passes when all checks complete successfully
 6. Times out after `timeout` minutes if checks are still running
+
+## Important
+
+The `job-name` input **must exactly match** the `name:` field of the job running this action. This is required because composite actions cannot automatically detect their parent job name.
 
 ## License
 
